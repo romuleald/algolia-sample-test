@@ -1,0 +1,19 @@
+body {
+    max-width: 1280px;
+    margin: auto;
+    font-family: sans-serif;
+}
+
+.header-content {
+
+    &:not(.active) {
+        display: none;
+    }
+}
+
+.table-pop{
+    td{
+        padding: 2px 5px;
+        border: solid 1px;
+    }
+}
