@@ -9,23 +9,80 @@
     <link rel="stylesheet" href="assets/css/main.css">
 </head>
 <body>
+<div class="wrapper">
+    <header>
+        <input class="js-search" type="search" id="search"
+               placeholder="search for Restaurants by Name, Cuisine or Location">
+    </header>
+    <div class="result">
+        <div class="filter">
+            <div class="">
+                <p>Cuisine/Food Type</p>
+                <ul class="js-filter" data-name="foods">
+                    <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span>{{ type }}</span><span class="filter-count">{{ count }}</span></li>
+                </ul>
+            </div>
+            <div class="">
+                <p>Cuisine/Food Type</p>
+                <ul class="js-filter" data-name="stars">
+                    <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span class="stars-5"></span></li>
+                </ul>
+            </div>
+            <div class="">
+                <p>Payment Options</p>
+                <ul class="js-filter" data-name="payment">
+                    <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span>{{ type }}</span></li>
+                </ul>
+            </div>
+        </div>
+        <div class="result-list">
+            <p><span class="js-result-count"></span></p>
+            <ul class="js-result">
+                <li class="result-item" data-id="{{ objectId }}">
+                    <div class="media">
+                        <img src="data:image/jpeg;base64,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" alt="">
+                    </div>
+                    <div class="content">
+                         <h2 class="title">title</h2>
+                        <p class=""><span class="review">4.5 <span class="stars"><span class="stared">★★★★</span>★</span></span> <span class="more-info">(2154 reviews)</span></p>
+                        <p class="more-info">Food type | place | price range</p>
+                    </div>
+                </li>
 
-<div class="welcome-container">
-    <p>Hello buddy!</p>
-    <p>Welcome to the CSS test</p>
-    <p>That blank page is all yours, let's make it rock!</p>
+            </ul>
+        </div>
+    </div>
 </div>
-
-
-<input class="js-search" type="search" id="search">
-
-<ul class="js-result"></ul>
 
 <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
 <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
 <script src="assets/js/main.js"></script>
 <script id="tpl_search" type="text/template">
-    <li data-id="{{ objectId }}">{{ name }}</li>
+    <li class="result-item" data-id="{{ objectId }}">
+        <div class="media">
+            <img src="{{ media }}" alt="">
+        </div>
+        <div class="content">
+            <h2 class="title">{{ name }}</h2>
+            <p class=""><span class="review">{{ score }} {{ stars }}</span> <span class="more-info">({{ review }} reviews)</span></p>
+            <p class="more-info">{{ foodtype }} | {{ place }} | {{ pricerange }}</p>
+        </div>
+    </li>
+</script>
+<script id="tpl_filter_foods" type="text/template">
+    <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span>{{ type }}</span><span>{{ count }}</span></li>
+</script>
+<script id="tpl_filter_stars" type="text/template">
+    <li class="js-filter-item filter-item" data-type="stars" data-name="{{ type }}">{{ content }}</li>
+</script>
+<script id="tpl_filter_payment" type="text/template">
+    <li class="js-filter-item filter-item" data-type="payment" data-name="{{ type }}"><span>{{ type }}</span></li>
+</script>
+<script id="tpl_search_total" type="text/template">
+    {{ count }} founds in {{ time }} second
+</script>
+<script id="tpl_stars" type="text/template">
+    <span class="stars"><span class="stared">{{ stars }}</span>{{ stared }}</span>
 </script>
 </body>
 </html>

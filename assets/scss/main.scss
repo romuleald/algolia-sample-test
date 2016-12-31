@@ -1,14 +1,89 @@
+$grey: #999;
+$stargrey: #BBB;
 body {
   font-family: 'Open Sans', sans-serif;
-  font-size: 13px;
+  font-size: 16px;
 }
 
-.welcome-container {
-  margin: 50px 0 0 0;
-  text-align: center;
-  font-size: 2em;
+.wrapper {
+  display: flex;
+  flex-flow: column;
+  height: 100vh;
+}
 
+//
+header {
+  background-color: deepskyblue;
+  flex: 0 1 auto;
+  padding: 30px;
+
+  input[type="search"] {
+    width: 100%;
+    padding: 10px;
+    display: block;
+    box-sizing: border-box;
+  }
+}
+
+.result {
+  display: flex;
+  flex: 1 0 auto;
+  .result-list {
+    flex: 1 0 auto;
+    border-left: solid 1px $grey;
+    padding: 10px;
+  }
+  .filter-item {
+    display: flex;
+    justify-content: space-between;
+  }
+}
+
+.filter {
+  flex: 0 1 200px;
+  padding: 10px;
   p {
-    margin: 5px;
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #222;
+  }
+  ul {
+    padding: 0;
+  }
+  .filter-count {
+    color: $grey;
+  }
+}
+
+.result-item {
+  display: flex;
+  .media {
+    flex: 0 1 auto;
+    img {
+      border-radius: 5px;
+    }
+  }
+  .content {
+    display: flex;
+    flex: 1 0 auto;
+    flex-flow: column;
+  }
+  .title {
+    font-size: 1.4em;
+  }
+  .review {
+    color: darkorange;
+    font-weight: bold;
+  }
+  .more-info {
+    color: $grey;
+  }
+}
+
+.stars {
+  color: $stargrey;
+
+  .stared {
+    color: darkorange;
   }
 }
