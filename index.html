@@ -16,7 +16,7 @@
     </header>
     <div class="result">
         <div class="filter">
-            <div class="">
+            <div class="filter-wrapper js-item-toggler" data-toggler-group="filter-food" data-toggler-itemid="filter-food">
                 <p>Cuisine/Food Type</p>
                 <ul class="js-filter" data-name="foods">
                     <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}">
@@ -24,6 +24,7 @@
                     <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}">
                         <span>{{ type }}</span><span class="filter-count">{{ count }}</span></li>
                 </ul>
+                <p class="more js-toggler" data-toggler-group="filter-food" data-toggler-id="filter-food">More/Less</p>
             </div>
             <div class="">
                 <p>Cuisine/Food Type</p>
@@ -82,8 +83,7 @@
     </li>
 </script>
 <script id="tpl_filter_foods" type="text/template">
-    <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span>{{ type }}</span><span>{{ count }}</span>
-    </li>
+    <li class="js-filter-item filter-item {{ hide }}" data-type="food" data-name="{{ type }}"><span>{{ type }}</span><span>{{ count }}</span></li>
 </script>
 <script id="tpl_filter_stars" type="text/template">
     <li class="js-filter-item filter-item" data-type="stars" data-name="{{ type }}">{{ content }}</li>

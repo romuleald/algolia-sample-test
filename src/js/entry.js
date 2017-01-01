@@ -36,17 +36,15 @@ var setFilterHTML = function (name, filters) {
     let aFilters = Object.keys(filters);
     //todo sort by desc quantity
     for (var i = 0; i < aFilters.length; i++) {
-        if(i >= 5){
-            break
-        }
         let item = aFilters[i];
         let options = {count: filters[item].length, type: item};
         if ('stars' === name) {
             options['content'] = makeStars(item);
         }
+        options['hide'] = i >= 5 ? 'mod-hide' : '';
         html += getTpl(options, 'tpl_filter_' + name);
     }
-    $(`.js-filter[data-name="${name}"]`).html(html);
+    $(`.js-filter[data-name="${name}"]`).html(html).toggleClass('show-more-filter', aFilters.length > 5);
 };
 
 var insertResult = function (page) {
@@ -144,7 +142,7 @@ $('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
             `).attr('id', 'highlightcss');
             $('head').append($css);
         }
-        else{
+        else {
             $('#highlightcss').remove();
         }
 

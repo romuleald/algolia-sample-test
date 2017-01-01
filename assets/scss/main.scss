@@ -51,18 +51,51 @@ header {
 }
 
 .filter-item {
+    border-radius: $borderRadius;
     cursor: pointer;
     display: flex;
     justify-content: space-between;
+    overflow: hidden;
     padding: 2px 20px;
-    border-radius: $borderRadius;
     transition: 125ms;
+    &.mod-hide {
+        height: 0;
+        opacity: 0;
+        position: absolute;
+    }
     &:hover, a.active {
         background: $colorHighlightBackground;
         color: $colorHighlightText;
         > * {
             color: inherit;
         }
+    }
+}
+
+.filter-wrapper {
+    bottom: 20px;
+    padding: 0;
+    top: 20px;
+    transition: 250ms;
+    &.active {
+        //todo not the best design but the idea is here
+        background: white;
+        border: solid 1px;
+        bottom: 0;
+        overflow: auto;
+        position: fixed;
+        top: 0;
+        padding: 0 10px;
+        .filter-item {
+            &.mod-hide {
+                height: auto;
+                opacity: 1;
+                position: static;
+            }
+        }
+    }
+    :not(.show-more-filter) + .more {
+        display: none;
     }
 }
 
