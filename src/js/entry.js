@@ -9,6 +9,7 @@ webmodule.init();
 var client = algoliasearch('TDV4I77F2F', 'c5731b2aa4cb316c0f55990145f0126d');
 
 var DOMResult = document.querySelector('.js-result');
+var DOMResultMetric = document.querySelector('.js-result-count');
 
 const itemPerPage = 3;
 let currentUIPage = 0;
@@ -33,16 +34,26 @@ var showListResult = function (html, addHtml = true) {
 var setFilterHTML = function (name, filters) {
     let html = '';
     let aFilters = Object.keys(filters);
-    aFilters.forEach(function (item) {
+    //todo sort by desc quantity
+    for (var i = 0; i < aFilters.length; i++) {
+        if(i >= 5){
+            break
+        }
+        let item = aFilters[i];
         let options = {count: filters[item].length, type: item};
         if ('stars' === name) {
             options['content'] = makeStars(item);
         }
         html += getTpl(options, 'tpl_filter_' + name);
-    });
+    }
     $(`.js-filter[data-name="${name}"]`).html(html);
 };
-var searchEnd = function (allRes) {
+
+var insertResult = function (page) {
+    //todo paginate result
+};
+
+var searchEnd = function (allRes, timing) {
     let html = '';
     let allFoodType = {};
     let allStarsCount = {};
@@ -53,10 +64,10 @@ var searchEnd = function (allRes) {
         let item = allRes[i];
         let id = item.objectID;
         let foodType = item.food_type;
-        let starsCount = Math.floor(item.stars_count);
+        let starsCountRounded = Math.floor(item.stars_count);
         let payment = item.payment_options;
         (allFoodType[foodType] = allFoodType[foodType] ? allFoodType[foodType] : []).push(id);
-        (allStarsCount[starsCount] = allStarsCount[starsCount] ? allStarsCount[starsCount] : []).push(id);
+        (allStarsCount[starsCountRounded] = allStarsCount[starsCountRounded] ? allStarsCount[starsCountRounded] : []).push(id);
         for (let iPayment = 0; iPayment < payment.length; iPayment++) {
             (allPayment[payment[iPayment]] = allPayment[payment[iPayment]] ? allPayment[payment[iPayment]] : []).push(id);
         }
@@ -66,11 +77,13 @@ var searchEnd = function (allRes) {
                 name: item.name,
                 reserveurl: item.reserve_url,
                 score: item.stars_count,
+                scoreRounded: starsCountRounded,
                 stars: getStars(item.stars_count),
                 review: item.reviews_count,
                 foodtype: item.food_type,
                 place: item.area,
-                pricerange: item.price_range
+                pricerange: item.price_range,
+                payment: item.payment_options.join(',')
             }, 'tpl_search');
         }
     }
@@ -79,11 +92,16 @@ var searchEnd = function (allRes) {
     setFilterHTML('stars', allStarsCount);
     setFilterHTML('payment', allPayment);
     showListResult(html);
+    //todo need a function
+    DOMResultMetric.innerHTML = getTpl({count: allRes.length, time: timing / 1000}, 'tpl_search_total');
+
 };
 var searchStart = function (query) {
     let allRes = [];
+    let timing = 0;
     var searchDone = function searchDone(err, content) {
         let result = content.results[0];
+        timing += result.processingTimeMS;
         allRes = concatResult(result.hits, allRes);
         if (result.nbPages > result.page + 1) {
             client.search([{
@@ -95,7 +113,7 @@ var searchStart = function (query) {
             }], searchDone);
         }
         else {
-            searchEnd(allRes);
+            searchEnd(allRes, timing);
         }
     };
     client.search([{
@@ -110,6 +128,30 @@ $('.js-search').on('input', function (e) {
     TIMEOUTsearch = setTimeout(function () {
         searchStart(query);
     }, 200);
+});
+$('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
+    let type = e.type;
+    //enter/leave = highlight
+    let filterType = this.getAttribute('data-type');
+    let filterName = this.getAttribute('data-name');
+
+    if (/mouseleave|mouseenter/.test(type)) {
+        if (type === 'mouseenter') {
+            let $css = $('<style>').html(`
+                .result-item:not([data-type-${filterType}*="${filterName}"]){
+                    opacity: .5;
+                }
+            `).attr('id', 'highlightcss');
+            $('head').append($css);
+        }
+        else{
+            $('#highlightcss').remove();
+        }
+
+    }
+    //click = filter
+
+
 });
 
 //merge jsons
