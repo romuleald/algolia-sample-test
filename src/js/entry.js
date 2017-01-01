@@ -6,6 +6,22 @@ import algoliasearch from 'algoliasearch';
 toggler();
 webmodule.init();
 
+/**
+ * @namespace
+ * @property {object}  result
+ * @property {number}  result.nbPages
+ * @namespace
+ * @property {object}  item
+ * @property {number}  defaults.stars_count
+ * @property {string}  defaults.reserve_url
+ * @property {string}  defaults.price_range
+ * @property {number}  defaults.reviews_count
+ * @property {string}  defaults.food_type
+ * @property {string}  defaults.image_url
+ * @property {Array}  defaults.payment_options
+ */
+
+
 var client = algoliasearch('TDV4I77F2F', 'c5731b2aa4cb316c0f55990145f0126d');
 
 var DOMResult = document.querySelector('.js-result');
@@ -13,6 +29,10 @@ var DOMResultMetric = document.querySelector('.js-result-count');
 
 const itemPerPage = 3;
 let currentUIPage = 0;
+
+var currentResult = [];
+var currentResultFiltered = [];
+
 var getStars = function (r) {
     return '★'.repeat(Math.abs(r))
 };
@@ -23,17 +43,20 @@ var makeStars = function (score) {
 var concatResult = function (res, allRes) {
     return allRes.concat(res);
 };
-var showListResult = function (html, addHtml = true) {
+var showListResult = function (html, addHtml = true, isOver) {
     if (addHtml) {
         DOMResult.innerHTML = html;
     }
     else {
         DOMResult.insertAdjacentHTML('beforeend', html);
     }
+    DOMResult.classList.toggle('no-more-result', isOver)
 };
 var setFilterHTML = function (name, filters) {
     let html = '';
-    let aFilters = Object.keys(filters);
+    let aFilters = Object.keys(filters).sort(function (a, b) {
+        return filters[b].length - filters[a].length;
+    });
     //todo sort by desc quantity
     for (var i = 0; i < aFilters.length; i++) {
         let item = aFilters[i];
@@ -47,17 +70,56 @@ var setFilterHTML = function (name, filters) {
     $(`.js-filter[data-name="${name}"]`).html(html).toggleClass('show-more-filter', aFilters.length > 5);
 };
 
-var insertResult = function (page) {
-    //todo paginate result
+var nextResult = function () {
+    currentUIPage++;
+    insertResult();
+};
+
+var insertResult = function (page = currentUIPage) {
+    let html = '';
+    let currentIndex = page * itemPerPage;
+    let toIndex = (page + 1) * itemPerPage;
+    for (let i = currentIndex; i < Math.min(Math.max(i, toIndex), currentResultFiltered.length); i++) {
+        let item = currentResultFiltered[i];
+        let starsCountRounded = Math.floor(item.stars_count);
+        html += getTpl({
+            media: item.image_url,
+            name: item.name,
+            reserveurl: item.reserve_url,
+            score: item.stars_count,
+            scoreRounded: starsCountRounded,
+            stars: getStars(item.stars_count),
+            review: item.reviews_count,
+            foodtype: item.food_type,
+            place: item.area,
+            pricerange: item.price_range,
+            payment: item.payment_options.join(',')
+        }, 'tpl_search');
+    }
+    let isOver = currentResultFiltered.length < toIndex;
+    showListResult(html, page === 0, isOver);
+
+    currentUIPage = page;
+};
+var clearFilter = function () {
+    currentResultFiltered = Object.assign(currentResult);
+    insertResult(0);
+
+};
+var filterResult = function (filterType, filterName) {
+    currentResultFiltered = currentResult.filter(function (item) {
+        return item[filterType] === filterName;
+    });
+    insertResult(0);
 };
 
 var searchEnd = function (allRes, timing) {
-    let html = '';
     let allFoodType = {};
     let allStarsCount = {};
     let allPayment = {};
     currentUIPage = 0; //always reset
-
+    currentResult = Object.assign(allRes);
+    currentResultFiltered = Object.assign(allRes);
     for (let i = 0; i < allRes.length; i++) {
         let item = allRes[i];
         let id = item.objectID;
@@ -69,30 +131,14 @@ var searchEnd = function (allRes, timing) {
         for (let iPayment = 0; iPayment < payment.length; iPayment++) {
             (allPayment[payment[iPayment]] = allPayment[payment[iPayment]] ? allPayment[payment[iPayment]] : []).push(id);
         }
-        if (i < itemPerPage) {
-            html += getTpl({
-                media: item.image_url,
-                name: item.name,
-                reserveurl: item.reserve_url,
-                score: item.stars_count,
-                scoreRounded: starsCountRounded,
-                stars: getStars(item.stars_count),
-                review: item.reviews_count,
-                foodtype: item.food_type,
-                place: item.area,
-                pricerange: item.price_range,
-                payment: item.payment_options.join(',')
-            }, 'tpl_search');
-        }
     }
 
     setFilterHTML('foods', allFoodType);
     setFilterHTML('stars', allStarsCount);
     setFilterHTML('payment', allPayment);
-    showListResult(html);
     //todo need a function
     DOMResultMetric.innerHTML = getTpl({count: allRes.length, time: timing / 1000}, 'tpl_search_total');
-
+    insertResult(currentUIPage);
 };
 var searchStart = function (query) {
     let allRes = [];
@@ -120,12 +166,16 @@ var searchStart = function (query) {
     }], searchDone);
 };
 let TIMEOUTsearch = 0;
-$('.js-search').on('input', function (e) {
+$('.js-search').on('input', function () {
     let query = this.value;
     clearTimeout(TIMEOUTsearch);
     TIMEOUTsearch = setTimeout(function () {
         searchStart(query);
     }, 200);
+});
+
+$('.js-show-more-result').on('click', function () {
+    nextResult();
 });
 $('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
     let type = e.type;
@@ -136,8 +186,12 @@ $('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
     if (/mouseleave|mouseenter/.test(type)) {
         if (type === 'mouseenter') {
             let $css = $('<style>').html(`
+                .result-wrapper {
+                    transform: scale(.3)!important;
+                    transition: transform 250ms 5s!important;
+                }
                 .result-item:not([data-type-${filterType}*="${filterName}"]){
-                    opacity: .5;
+                    opacity: .5!important;
                 }
             `).attr('id', 'highlightcss');
             $('head').append($css);
@@ -145,9 +199,18 @@ $('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
         else {
             $('#highlightcss').remove();
         }
-
     }
-    //click = filter
+    if ('click' === type) {
+        let currentActive = document.querySelector('.js-filter-item.active');
+        if(!this.classList.contains('active')){
+            filterResult(filterType, filterName);
+            this.classList.add('active');
+        }
+        else{
+            clearFilter();
+        }
+        currentActive && currentActive.classList.remove('active');
+    }
 
 
 });

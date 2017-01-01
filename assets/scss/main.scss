@@ -63,7 +63,7 @@ header {
         opacity: 0;
         position: absolute;
     }
-    &:hover, a.active {
+    &:hover, &.active {
         background: $colorHighlightBackground;
         color: $colorHighlightText;
         > * {
@@ -107,6 +107,11 @@ header {
     .result-wrapper {
         margin: 0;
         padding: 0;
+        transform-origin: left top;
+        transition: transform 250ms;
+    }
+    .no-more-result + .show-more-result {
+        display: none;
     }
 }
 

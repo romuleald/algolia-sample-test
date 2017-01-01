@@ -27,7 +27,7 @@
                 <p class="more js-toggler" data-toggler-group="filter-food" data-toggler-id="filter-food">More/Less</p>
             </div>
             <div class="">
-                <p>Cuisine/Food Type</p>
+                <p>Rating</p>
                 <ul class="js-filter" data-name="stars">
                     <li class="js-filter-item filter-item" data-type="food" data-name="{{ type }}"><span
                             class="stars-5"></span></li>
@@ -62,6 +62,7 @@
                 </li>
 
             </ul>
+            <p class="show-more-result js-show-more-result">More Result</p>
         </div>
     </div>
 </div>
@@ -70,7 +71,7 @@
 <script>window.jQuery || document.write('<script src="assets/js/vendor/jquery-1.11.2.min.js"><\/script>')</script>
 <script src="assets/js/main.js"></script>
 <script id="tpl_search" type="text/template">
-    <li class="result-item" data-id="{{ objectId }}" data-type-food="{{ foodtype }}" data-type-stars="{{ scoreRounded }}" data-type-payment="{{ payment }}">
+    <li class="result-item" data-id="{{ objectId }}" data-type-food_type="{{ foodtype }}" data-type-stars="{{ scoreRounded }}" data-type-payment="{{ payment }}">
         <div class="media">
             <img src="{{ media }}" alt="">
         </div>
@@ -83,7 +84,7 @@
     </li>
 </script>
 <script id="tpl_filter_foods" type="text/template">
-    <li class="js-filter-item filter-item {{ hide }}" data-type="food" data-name="{{ type }}"><span>{{ type }}</span><span>{{ count }}</span></li>
+    <li class="js-filter-item filter-item {{ hide }}" data-type="food_type" data-name="{{ type }}"><span>{{ type }}</span><span class="filter-count">{{ count }}</span></li>
 </script>
 <script id="tpl_filter_stars" type="text/template">
     <li class="js-filter-item filter-item" data-type="stars" data-name="{{ type }}">{{ content }}</li>
