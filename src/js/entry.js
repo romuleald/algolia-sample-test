@@ -22,6 +22,8 @@ webmodule.init();
  */
 
 
+//todo use helper to sort by geo position or aroundLatLngViaIP if no geo available
+
 var client = algoliasearch('TDV4I77F2F', 'c5731b2aa4cb316c0f55990145f0126d');
 
 var DOMResult = document.querySelector('.js-result');
@@ -33,6 +35,10 @@ let currentUIPage = 0;
 var currentResult = [];
 var currentResultFiltered = [];
 
+const includedPaymentCard = ['AMEX', 'Visa', 'Discover', 'MasterCard'].join(',');
+const mergedPaymentCard = {
+    'Diners Club': 'Discover', 'Carte Blanche': 'Discover'
+};
 var getStars = function (r) {
     return '★'.repeat(Math.abs(r))
 };
@@ -57,12 +63,19 @@ var setFilterHTML = function (name, filters) {
     let aFilters = Object.keys(filters).sort(function (a, b) {
         return filters[b].length - filters[a].length;
     });
-    //todo sort by desc quantity
     for (var i = 0; i < aFilters.length; i++) {
         let item = aFilters[i];
         let options = {count: filters[item].length, type: item};
         if ('stars' === name) {
             options['content'] = makeStars(item);
+        }
+        if ('payment' === name) {
+            item = mergedPaymentCard[item] || item;
+            options.name = item;
+            var include = new RegExp(item).test(includedPaymentCard);
+            if (!include) {
+                continue;
+            }
         }
         options['hide'] = i >= 5 ? 'mod-hide' : '';
         html += getTpl(options, 'tpl_filter_' + name);
@@ -108,7 +121,12 @@ var clearFilter = function () {
 };
 var filterResult = function (filterType, filterName) {
     currentResultFiltered = currentResult.filter(function (item) {
-        return item[filterType] === filterName;
+        let itemFilter = item[filterType];
+        if ('payment' === filterType) {
+            itemFilter = itemFilter.join ? itemFilter.join(',') : itemFilter;//if in any case when it's single there's no array
+            itemFilter = mergedPaymentCard[itemFilter] || itemFilter;
+        }
+        return new RegExp(filterName).test(itemFilter);
     });
     insertResult(0);
 };
@@ -202,11 +220,11 @@ $('body').on('click mouseenter mouseleave', '.js-filter-item', function (e) {
     }
     if ('click' === type) {
         let currentActive = document.querySelector('.js-filter-item.active');
-        if(!this.classList.contains('active')){
+        if (!this.classList.contains('active')) {
             filterResult(filterType, filterName);
             this.classList.add('active');
         }
-        else{
+        else {
             clearFilter();
         }
         currentActive && currentActive.classList.remove('active');
